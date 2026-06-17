@@ -109,59 +109,76 @@ fun TrackingScreen(viewModel: TrackingViewModel = viewModel(), modifier: Modifie
         )
 
         // Main Controls
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = if (isTracking) stringResource(R.string.track_status_recording) else stringResource(R.string.track_status_idle),
-                style = MaterialTheme.typography.titleMedium,
-                color = if (isTracking) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    val intent = Intent(context, LocationTrackingService::class.java).apply {
-                        action = if (isTracking) LocationTrackingService.ACTION_STOP else LocationTrackingService.ACTION_START
-                    }
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                        context.startForegroundService(intent)
-                    } else {
-                        context.startService(intent)
-                    }
-                },
-                modifier = Modifier.size(width = 200.dp, height = 50.dp)
+        Card(
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = if (isTracking) Icons.Default.Close else Icons.Default.PlayArrow,
-                    contentDescription = if (isTracking) stringResource(R.string.track_button_stop) else stringResource(R.string.track_button_start)
+                Text(
+                    text = if (isTracking) stringResource(R.string.track_status_recording) else stringResource(R.string.track_status_idle),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = if (isTracking) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = if (isTracking) stringResource(R.string.track_button_stop) else stringResource(R.string.track_button_start))
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        val intent = Intent(context, LocationTrackingService::class.java).apply {
+                            action = if (isTracking) LocationTrackingService.ACTION_STOP else LocationTrackingService.ACTION_START
+                        }
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                            context.startForegroundService(intent)
+                        } else {
+                            context.startService(intent)
+                        }
+                    },
+                    modifier = Modifier.size(width = 200.dp, height = 50.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isTracking) Icons.Default.Close else Icons.Default.PlayArrow,
+                        contentDescription = if (isTracking) stringResource(R.string.track_button_stop) else stringResource(R.string.track_button_start)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = if (isTracking) stringResource(R.string.track_button_stop) else stringResource(R.string.track_button_start))
+                }
             }
         }
 
         if (isTracking && currentLocation != null) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = stringResource(R.string.track_data_title), style = MaterialTheme.typography.titleMedium)
-                Text(text = "Lat: ${currentLocation?.latitude}, Lon: ${currentLocation?.longitude}", style = MaterialTheme.typography.bodyMedium)
-                Text(text = "Alt: ${currentLocation?.altitude}m, Speed: ${currentLocation?.speed}m/s", style = MaterialTheme.typography.bodyMedium)
+                Column(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = stringResource(R.string.track_data_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(text = "Lat: ${currentLocation?.latitude}, Lon: ${currentLocation?.longitude}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = "Alt: ${currentLocation?.altitude}m, Speed: ${currentLocation?.speed}m/s", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                Text(text = stringResource(R.string.track_gnss_title), style = MaterialTheme.typography.titleMedium)
-                val usedConstellations = remember(satellites) { satellites.filter { it.usedInFix }.map { it.constellationType }.toSet() }
-                val availableConstellations = remember(satellites) { satellites.map { it.constellationType }.toSet() }
+                    Text(text = stringResource(R.string.track_gnss_title), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    val usedConstellations = remember(satellites) { satellites.filter { it.usedInFix }.map { it.constellationType }.toSet() }
+                    val availableConstellations = remember(satellites) { satellites.map { it.constellationType }.toSet() }
 
-                Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
-                    availableConstellations.forEach { type ->
-                        val name = CONSTELLATION_MAP[type] ?: "Unknown ($type)"
-                        val color = if (usedConstellations.contains(type)) Color.Green else Color.Red
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 4.dp)) {
-                            Box(modifier = Modifier.size(10.dp).background(color, CircleShape))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(text = name, style = MaterialTheme.typography.bodySmall)
+                    Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                        availableConstellations.forEach { type ->
+                            val name = CONSTELLATION_MAP[type] ?: "Unknown ($type)"
+                            // Instead of hardcoded Color.Green/Color.Red, using semantic colors if possible, but for satellite status red/green is fairly universal.
+                            // However, we can use MaterialTheme colors to make it more M3 compliant, e.g. primary for active, error for inactive.
+                            val color = if (usedConstellations.contains(type)) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 4.dp)) {
+                                Box(modifier = Modifier.size(10.dp).background(color, CircleShape))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(text = name, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
                     }
                 }

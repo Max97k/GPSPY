@@ -85,66 +85,77 @@ fun RoutineAnalysisScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Pie Chart
-            val currentSummary = summary
-            if (currentSummary != null && currentSummary.stateDurations.isNotEmpty()) {
-                val totalDuration = currentSummary.stateDurations.values.sum()
-                if (totalDuration > 0) {
-                    Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center) {
-                        Canvas(modifier = Modifier.fillMaxSize()) {
-                            var startAngle = -90f
-                            currentSummary.stateDurations.forEach { (state, duration) ->
-                                val sweepAngle = (duration.toFloat() / totalDuration) * 360f
-                                val color = when (state) {
-                                    RoutineState.HOME -> Color(0xFF42A5F5) // Blue
-                                    RoutineState.WORK -> Color(0xFF66BB6A) // Green
-                                    RoutineState.MOVING -> Color(0xFFEF5350) // Red
-                                    RoutineState.OUTDOOR_STAY -> Color(0xFFFFA726) // Orange
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Pie Chart
+                    val currentSummary = summary
+                    if (currentSummary != null && currentSummary.stateDurations.isNotEmpty()) {
+                        val totalDuration = currentSummary.stateDurations.values.sum()
+                        if (totalDuration > 0) {
+                            Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center) {
+                                Canvas(modifier = Modifier.fillMaxSize()) {
+                                    var startAngle = -90f
+                                    currentSummary.stateDurations.forEach { (state, duration) ->
+                                        val sweepAngle = (duration.toFloat() / totalDuration) * 360f
+                                        val color = when (state) {
+                                            RoutineState.HOME -> Color(0xFF42A5F5) // Blue
+                                            RoutineState.WORK -> Color(0xFF66BB6A) // Green
+                                            RoutineState.MOVING -> Color(0xFFEF5350) // Red
+                                            RoutineState.OUTDOOR_STAY -> Color(0xFFFFA726) // Orange
+                                        }
+                                        drawArc(
+                                            color = color,
+                                            startAngle = startAngle,
+                                            sweepAngle = sweepAngle,
+                                            useCenter = true
+                                        )
+                                        startAngle += sweepAngle
+                                    }
                                 }
-                                drawArc(
-                                    color = color,
-                                    startAngle = startAngle,
-                                    sweepAngle = sweepAngle,
-                                    useCenter = true
-                                )
-                                startAngle += sweepAngle
+                            }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            // Legend and Details
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                currentSummary.stateDurations.forEach { (state, durationMs) ->
+                                    val hours = TimeUnit.MILLISECONDS.toHours(durationMs)
+                                    val minutes = TimeUnit.MILLISECONDS.toMinutes(durationMs) % 60
+                                    val color = when (state) {
+                                        RoutineState.HOME -> Color(0xFF42A5F5)
+                                        RoutineState.WORK -> Color(0xFF66BB6A)
+                                        RoutineState.MOVING -> Color(0xFFEF5350)
+                                        RoutineState.OUTDOOR_STAY -> Color(0xFFFFA726)
+                                    }
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        // Color block
+                                        Surface(color = color, modifier = Modifier.size(16.dp), shape = MaterialTheme.shapes.small) {}
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "${state.name}: $hours h $minutes min",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.padding(vertical = 4.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center) {
+                                Text("No tracking time accumulated", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
-                    }
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    // Legend and Details
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        currentSummary.stateDurations.forEach { (state, durationMs) ->
-                            val hours = TimeUnit.MILLISECONDS.toHours(durationMs)
-                            val minutes = TimeUnit.MILLISECONDS.toMinutes(durationMs) % 60
-                            val color = when (state) {
-                                RoutineState.HOME -> Color(0xFF42A5F5)
-                                RoutineState.WORK -> Color(0xFF66BB6A)
-                                RoutineState.MOVING -> Color(0xFFEF5350)
-                                RoutineState.OUTDOOR_STAY -> Color(0xFFFFA726)
-                            }
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                // Color block
-                                Surface(color = color, modifier = Modifier.size(16.dp)) {}
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "${state.name}: $hours h $minutes min",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(vertical = 4.dp)
-                                )
-                            }
+                    } else {
+                        Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center) {
+                            Text("No data for this day", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
-                } else {
-                    Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center) {
-                        Text("No tracking time accumulated", style = MaterialTheme.typography.titleMedium)
-                    }
-                }
-            } else {
-                Box(modifier = Modifier.fillMaxWidth().height(250.dp), contentAlignment = Alignment.Center) {
-                    Text("No data for this day", style = MaterialTheme.typography.titleMedium)
                 }
             }
 

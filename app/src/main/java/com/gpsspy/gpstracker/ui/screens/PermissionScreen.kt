@@ -72,29 +72,34 @@ fun PermissionScreen(
             Spacer(modifier = Modifier.height(32.dp))
             
             // Educational Checklist
-            Column(modifier = Modifier.fillMaxWidth()) {
-                PermissionItem(
-                    icon = Icons.Default.LocationOn,
-                    title = stringResource(R.string.perm_loc_title),
-                    description = stringResource(R.string.perm_loc_desc)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                     PermissionItem(
-                        icon = Icons.Default.Info,
-                        title = stringResource(R.string.perm_act_title),
-                        description = stringResource(R.string.perm_act_desc)
+                        icon = Icons.Default.LocationOn,
+                        title = stringResource(R.string.perm_loc_title),
+                        description = stringResource(R.string.perm_loc_desc)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        PermissionItem(
+                            icon = Icons.Default.Info,
+                            title = stringResource(R.string.perm_act_title),
+                            description = stringResource(R.string.perm_act_desc)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                    PermissionItem(
+                        icon = Icons.Default.Notifications,
+                        title = stringResource(R.string.perm_notif_title),
+                        description = stringResource(R.string.perm_notif_desc)
+                    )
                 }
-                PermissionItem(
-                    icon = Icons.Default.Notifications,
-                    title = stringResource(R.string.perm_notif_title),
-                    description = stringResource(R.string.perm_notif_desc)
-                )
             }
             
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(32.dp))
             Button(onClick = {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -115,17 +120,29 @@ fun PermissionScreen(
             }
         } else {
             // PROMINENT DISCLOSURE SCREEN (Crucial for Google Play Policy)
-            Text(
-                text = stringResource(R.string.perm_bg_title),
-                style = MaterialTheme.typography.headlineMedium,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.perm_bg_description),
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center
-            )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.perm_bg_title),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.perm_bg_description),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(32.dp))
             Button(onClick = {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -160,8 +177,8 @@ fun PermissionItem(icon: ImageVector, title: String, description: String) {
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column {
-            Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            Text(text = description, style = MaterialTheme.typography.bodyMedium)
+            Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
