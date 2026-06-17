@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.Log
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityRecognitionClient
+import com.google.android.gms.location.DetectedActivity
 import com.gpsspy.gpstracker.data.database.routine.RoutineAnalysis
 import com.gpsspy.gpstracker.data.database.routine.RoutineAnalysisDao
 import com.gpsspy.gpstracker.data.database.routine.RoutineState
