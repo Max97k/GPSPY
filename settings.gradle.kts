@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "GpsTracker"
 include(":app")
+include(":wear")
