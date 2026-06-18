@@ -18,7 +18,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.gpsspy.gpstracker.data.database.SessionSummary
 import com.gpsspy.gpstracker.ui.viewmodels.HistoryViewModel
 import com.gpsspy.gpstracker.utils.GpxGenerator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -99,14 +101,17 @@ fun SessionItem(session: SessionSummary, onExport: () -> Unit, onDelete: () -> U
     }
 }
 
-private fun exportGpxFile(context: Context, gpxContent: String, fileName: String) {
+private suspend fun exportGpxFile(context: Context, gpxContent: String, fileName: String) {
     try {
-        val path = File(context.cacheDir, "gpx_exports")
-        if (!path.exists()) path.mkdirs()
+        val file = withContext(Dispatchers.IO) {
+            val path = File(context.cacheDir, "gpx_exports")
+            if (!path.exists()) path.mkdirs()
 
-        val file = File(path, fileName)
-        FileOutputStream(file).use {
-            it.write(gpxContent.toByteArray())
+            val file = File(path, fileName)
+            FileOutputStream(file).use {
+                it.write(gpxContent.toByteArray())
+            }
+            file
         }
 
         val uri: Uri = FileProvider.getUriForFile(
