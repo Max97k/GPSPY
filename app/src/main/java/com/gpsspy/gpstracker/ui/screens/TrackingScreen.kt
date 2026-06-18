@@ -31,7 +31,9 @@ import com.gpsspy.gpstracker.R
 import com.gpsspy.gpstracker.service.LocationTrackingService
 import com.gpsspy.gpstracker.ui.viewmodels.TrackingViewModel
 import com.gpsspy.gpstracker.utils.GpxGenerator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 private val CONSTELLATION_MAP = mapOf(
@@ -220,14 +222,17 @@ fun TrackingScreen(viewModel: TrackingViewModel = viewModel(), modifier: Modifie
     }
 }
 
-private fun exportGpxFile(context: Context, gpxContent: String, fileName: String) {
+private suspend fun exportGpxFile(context: Context, gpxContent: String, fileName: String) {
     try {
-        val path = File(context.cacheDir, "gpx_exports")
-        if (!path.exists()) path.mkdirs()
+        val file = withContext(Dispatchers.IO) {
+            val path = File(context.cacheDir, "gpx_exports")
+            if (!path.exists()) path.mkdirs()
 
-        val file = File(path, fileName)
-        FileOutputStream(file).use {
-            it.write(gpxContent.toByteArray())
+            val targetFile = File(path, fileName)
+            FileOutputStream(targetFile).use {
+                it.write(gpxContent.toByteArray())
+            }
+            targetFile
         }
 
         // Use FileProvider to share the file securely
