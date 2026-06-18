@@ -78,12 +78,15 @@ fun SessionItem(session: SessionSummary, onExport: () -> Unit, onDelete: () -> U
     val durationRemSec = durationSec % 60
     val durationStr = String.format("%02d:%02d", durationMin, durationRemSec)
 
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = stringResource(R.string.history_session_num, session.sessionId), style = MaterialTheme.typography.titleMedium)
+            Text(text = stringResource(R.string.history_session_num, session.sessionId), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = stringResource(R.string.history_start, startTimeStr), style = MaterialTheme.typography.bodyMedium)
-            Text(text = stringResource(R.string.history_duration, durationStr), style = MaterialTheme.typography.bodyMedium)
+            Text(text = stringResource(R.string.history_start, startTimeStr), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = stringResource(R.string.history_duration, durationStr), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
             Spacer(modifier = Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -91,7 +94,7 @@ fun SessionItem(session: SessionSummary, onExport: () -> Unit, onDelete: () -> U
                     Text(stringResource(R.string.history_export))
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = onDelete, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)) {
+                Button(onClick = onDelete, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError)) {
                     Text(stringResource(R.string.history_delete))
                 }
             }

@@ -41,7 +41,6 @@ fun MainScreen() {
             }
         }
     ) { innerPadding ->
-        Modifier.padding(innerPadding)
         when (selectedTab) {
             0 -> TrackingScreen(modifier = Modifier.padding(innerPadding))
             1 -> HistoryScreen(modifier = Modifier.padding(innerPadding))
