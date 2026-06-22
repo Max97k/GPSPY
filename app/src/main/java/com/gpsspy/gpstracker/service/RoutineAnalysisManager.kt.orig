@@ -8,7 +8,6 @@ import android.os.Build
 import android.util.Log
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityRecognitionClient
-import com.google.android.gms.location.DetectedActivity
 import com.gpsspy.gpstracker.data.database.routine.RoutineAnalysis
 import com.gpsspy.gpstracker.data.database.routine.RoutineAnalysisDao
 import com.gpsspy.gpstracker.data.database.routine.RoutineState
@@ -31,7 +30,7 @@ class RoutineAnalysisManager @Inject constructor(
     private val settingsRepository: SettingsRepository
 ) {
     private val activityRecognitionClient: ActivityRecognitionClient = ActivityRecognition.getClient(context)
-    
+
     // We will update this from ActivityUpdateReceiver (-1 = unknown, otherwise DetectedActivity.* constants)
     private val _currentPhysicalActivity = MutableStateFlow<Int>(-1)
     val currentPhysicalActivity: StateFlow<Int> = _currentPhysicalActivity.asStateFlow()
@@ -39,7 +38,7 @@ class RoutineAnalysisManager @Inject constructor(
     private var stillStartTime: Long? = null
     private var currentRoutineState: RoutineState? = null
     private val managerScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     // Settings cache
     private var homeLocation: Pair<Double?, Double?> = Pair(null, null)
     private var workLocation: Pair<Double?, Double?> = Pair(null, null)
@@ -61,7 +60,7 @@ class RoutineAnalysisManager @Inject constructor(
         managerScope.launch {
             settingsRepository.analysisRadiusFlow.collect { analysisRadius = it }
         }
-        
+
         managerScope.launch {
             // Restore current state from DB on boot/init
             val lastState = routineAnalysisDao.getCurrentState()
@@ -87,7 +86,6 @@ class RoutineAnalysisManager @Inject constructor(
         }
     }
 
-    @SuppressLint("MissingPermission") // Caller should check permissions
     fun stopListening() {
         val task = activityRecognitionClient.removeActivityUpdates(pendingIntent)
         task.addOnSuccessListener {
@@ -97,7 +95,7 @@ class RoutineAnalysisManager @Inject constructor(
             Log.e("RoutineAnalysisManager", "Failed to remove activity updates", e)
         }
     }
-    
+
     fun updateDetectedActivity(activityType: Int) {
         _currentPhysicalActivity.value = activityType
         Log.d("RoutineAnalysisManager", "Detected Activity updated to type: $activityType")
@@ -105,7 +103,7 @@ class RoutineAnalysisManager @Inject constructor(
         managerScope.launch {
             val now = System.currentTimeMillis()
             val isMoving = activityType == DetectedActivity.IN_VEHICLE || activityType == DetectedActivity.ON_BICYCLE || activityType == DetectedActivity.WALKING || activityType == DetectedActivity.RUNNING
-            
+
             if (activityType == 3) { // STILL
                 if (stillStartTime == null) {
                     stillStartTime = now
@@ -121,7 +119,7 @@ class RoutineAnalysisManager @Inject constructor(
             } else if (isMoving) {
                 // Cancel debounce timer
                 stillStartTime = null
-                
+
                 if (currentRoutineState != RoutineState.MOVING) {
                     // Transition immediately
                     commitStateTransition(RoutineState.MOVING, now)
@@ -133,13 +131,13 @@ class RoutineAnalysisManager @Inject constructor(
     private suspend fun commitStateTransition(newState: RoutineState, startTime: Long) {
         Log.d("RoutineAnalysisManager", "State transition: $currentRoutineState -> $newState at $startTime")
         currentRoutineState = newState
-        
+
         val latestRoutine = routineAnalysisDao.getCurrentState()
         if (latestRoutine != null) {
             val closedRoutine = latestRoutine.copy(endTime = startTime - 1)
             routineAnalysisDao.update(closedRoutine)
         }
-        
+
         routineAnalysisDao.insert(
             RoutineAnalysis(
                 startTime = startTime,

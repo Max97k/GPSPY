@@ -56,16 +56,10 @@ object GpxGenerator {
         return sb.toString()
     }
 
-    private val dateFormat = object : ThreadLocal<SimpleDateFormat>() {
-        override fun initialValue(): SimpleDateFormat {
-            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-            sdf.timeZone = TimeZone.getTimeZone("UTC")
-            return sdf
-        }
-    }
-
     private fun formatTime(timeMs: Long): String {
-        return dateFormat.get()!!.format(Date(timeMs))
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
+        sdf.timeZone = TimeZone.getTimeZone("UTC")
+        return sdf.format(Date(timeMs))
     }
 
     private fun escapeXml(input: String): String {

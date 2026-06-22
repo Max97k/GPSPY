@@ -30,31 +30,7 @@ You can download the latest version of the app directly from our **[GitHub Relea
 * **Dynamic Frequency Control:** Adjust your recording intervals dynamically (e.g., from 1 second to 60 seconds) without needing to interrupt the active session.
 * **Comprehensive Track Management:** A clean, tabbed interface to view all historical recorded sessions, their start times, and durations.
 * **Easy Export & Deletion:** Export any specific tracking session directly to a standard `GPX 1.1` XML file or delete it permanently from the local Room database to save space.
-* **Intelligent Routine Analysis:** A sophisticated background engine that monitors user behavior 24/7 to identify daily life patterns. See the [Deep Dive](#-routine-activity-analysis-deep-dive) section below.
 * **Google Play Policy Compliant:** Meets all strict background location policies (including prominent disclosures) for seamless publishing.
-
----
-
-## 🔍 Routine Activity Analysis Deep Dive
-
-The **Routine Activity Analysis** engine move beyond simple coordinates, providing users with a comprehensive breakdown of how they spend their time across space and time.
-
-### 🧠 The Intelligent State Machine
-The core of the analysis is a robust state machine that categorizes time into four primary states:
-- **🏠 HOME:** Automatically detected when stationary within a customizable radius of your set home coordinates.
-- **💼 WORK:** Identified when staying at your pre-defined workplace.
-- **🏃 MOVING:** Triggered by high-confidence activity recognition (Walking, Running, Cycling, or Driving).
-- **🌲 OUTDOOR STAY:** Stationary periods detected in locations outside of your primary zones (e.g., parks, shops, or friend's houses).
-
-### 🛠 Technical Implementation
-- **Activity Recognition API:** Integrates with Google Play Services to perform low-power behavior sensing, significantly reducing battery drain compared to continuous GPS polling.
-- **Temporal Debouncing:** Implements a 5-minute "Stationary Debounce" logic. The engine requires a sustained period of immobility before transitioning from `MOVING` to a stationary state, effectively filtering out sensor noise during stops at traffic lights or short pauses.
-- **Coordinate Matching:** Uses high-precision distance calculation algorithms to match current coordinates against user-defined profiles, allowing for fine-grained geofencing control (default 100m radius).
-- **Architecture:** Built on a decoupled service architecture using `RoutineAnalysisManager` and `ActivityUpdateReceiver`, ensuring analysis continues even if the main UI application is cleared from memory.
-
-### 📊 Data Insights & Export
-- **Custom Pie Chart:** A high-performance visualization component custom-drawn using Jetpack Compose `Canvas` for fluid daily summaries.
-- **Scientific JSON Export:** All analysis transitions are exportable as structured JSON data, facilitating advanced external analysis for spatial research or personal productivity audits.
 
 ## 🛠 Tech Stack
 
