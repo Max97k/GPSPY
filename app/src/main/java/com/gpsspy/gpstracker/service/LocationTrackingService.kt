@@ -118,7 +118,7 @@ class LocationTrackingService : Service() {
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.service_notif_title))
             .setContentText(getString(R.string.service_notif_desc))
-            .setSmallIcon(R.mipmap.ic_launcher) // TODO: create a proper notification icon
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(pendingIntent)
             .addAction(android.R.drawable.ic_media_pause, getString(R.string.service_notif_stop), stopPendingIntent)
             .setOngoing(true)
