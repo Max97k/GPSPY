@@ -204,7 +204,9 @@ fun TrackingScreen(viewModel: TrackingViewModel = viewModel(), modifier: Modifie
                     if (sessionId != null) {
                         val points = viewModel.getPointsForSession(sessionId)
                         if (points.isNotEmpty()) {
-                            val gpxString = GpxGenerator.generateGpx(points, "Session $sessionId")
+                            val gpxString = withContext(Dispatchers.Default) {
+                                GpxGenerator.generateGpx(points, "Session $sessionId")
+                            }
                             exportGpxFile(context, gpxString, "Session_${sessionId}.gpx")
                         } else {
                             Toast.makeText(context, context.getString(R.string.toast_no_data), Toast.LENGTH_SHORT).show()
