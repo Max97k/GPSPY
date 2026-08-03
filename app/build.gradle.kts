@@ -12,12 +12,12 @@ val gitCommitCount = providers.exec {
 
 android {
     namespace = "com.gpsspy.gpstracker"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.gpsspy.gpstracker"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 100 + gitCommitCount
         versionName = "1.2.$gitCommitCount"
 

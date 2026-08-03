@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.gpsspy.gpstracker.wear"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.gpsspy.gpstracker" // Must match mobile app exactly for paired communication
         minSdk = 30 // Wear OS 3+ for Compose
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }
