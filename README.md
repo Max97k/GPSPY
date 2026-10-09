@@ -16,7 +16,7 @@ An offline-first, high-accuracy 3D trajectory tracking app for Android.
 ---
 
 ## 🚀 Downloads
-You can download the latest version of the app directly from our **[GitHub Releases](https://github.com/kuoyaoming/GPSPY/releases)** page.
+You can download the latest version of the app directly from our **[GitHub Releases](https://github.com/Max97k/GPSPY/releases)** page.
 
 ---
 
@@ -80,7 +80,7 @@ The app is built utilizing modern Android development practices and the latest J
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/kuoyaoming/GPSPY.git
+   git clone https://github.com/Max97k/GPSPY.git
    cd GPSPY
    ```
 

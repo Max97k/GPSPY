@@ -65,7 +65,7 @@
 
 1. **複製儲存庫：**
    ```bash
-   git clone https://github.com/kuoyaoming/GPSPY.git
+   git clone https://github.com/Max97k/GPSPY.git
    cd GPSPY
    ```
 
