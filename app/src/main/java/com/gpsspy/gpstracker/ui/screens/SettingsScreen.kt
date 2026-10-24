@@ -44,11 +44,15 @@ fun SettingsScreen(
         )
 
         // Home Location Section
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = stringResource(id = R.string.settings_home_location),
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
@@ -58,12 +62,14 @@ fun SettingsScreen(
                     Text(
                         text = stringResource(id = R.string.settings_location_current, String.format(java.util.Locale.getDefault(), "%.5f", lat), String.format(java.util.Locale.getDefault(), "%.5f", lng)),
                         style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 } else {
                     Text(
                         text = stringResource(id = R.string.settings_location_not_set),
                         style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
@@ -78,7 +84,6 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val toastHomeUpdated = stringResource(id = R.string.settings_toast_home_updated)
-                val toastErrorMsg = stringResource(id = R.string.settings_toast_error, "")
 
                 Button(
                     onClick = {
@@ -113,11 +118,15 @@ fun SettingsScreen(
         }
 
         // Work Location Section
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = stringResource(id = R.string.settings_work_location),
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
@@ -127,12 +136,14 @@ fun SettingsScreen(
                     Text(
                         text = stringResource(id = R.string.settings_location_current, String.format(java.util.Locale.getDefault(), "%.5f", lat), String.format(java.util.Locale.getDefault(), "%.5f", lng)),
                         style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 } else {
                     Text(
                         text = stringResource(id = R.string.settings_location_not_set),
                         style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
@@ -147,7 +158,6 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val toastWorkUpdated = stringResource(id = R.string.settings_toast_work_updated)
-                val toastErrorMsg = stringResource(id = R.string.settings_toast_error, "")
 
                 Button(
                     onClick = {
@@ -182,17 +192,22 @@ fun SettingsScreen(
         }
 
         // Analysis Radius Section
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     text = stringResource(id = R.string.settings_analysis_radius),
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
                 Text(
                     text = stringResource(id = R.string.settings_radius_meters, analysisRadius.toInt()),
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
