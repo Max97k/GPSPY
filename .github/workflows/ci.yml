@@ -30,6 +30,10 @@ jobs:
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
           sdkmanager --channel=3 "platforms;android-37.0" || sdkmanager "platforms;android-37.0" || sdkmanager --channel=3 "platforms;android-37" || sdkmanager "platforms;android-37"
           ANDROID_SDK_PATH="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          mkdir -p "$ANDROID_SDK_PATH/tools/support"
+          if [ ! -f "$ANDROID_SDK_PATH/tools/support/annotations.jar" ]; then
+            jar -cf "$ANDROID_SDK_PATH/tools/support/annotations.jar" -C /tmp .
+          fi
           if [ -d "$ANDROID_SDK_PATH/platforms/android-37.0" ] && [ ! -d "$ANDROID_SDK_PATH/platforms/android-37" ]; then
             cp -r "$ANDROID_SDK_PATH/platforms/android-37.0" "$ANDROID_SDK_PATH/platforms/android-37"
             if [ -f "$ANDROID_SDK_PATH/platforms/android-37/package.xml" ]; then
@@ -70,6 +74,10 @@ jobs:
           yes | sdkmanager --licenses > /dev/null 2>&1 || true
           sdkmanager --channel=3 "platforms;android-37.0" || sdkmanager "platforms;android-37.0" || sdkmanager --channel=3 "platforms;android-37" || sdkmanager "platforms;android-37"
           ANDROID_SDK_PATH="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          mkdir -p "$ANDROID_SDK_PATH/tools/support"
+          if [ ! -f "$ANDROID_SDK_PATH/tools/support/annotations.jar" ]; then
+            jar -cf "$ANDROID_SDK_PATH/tools/support/annotations.jar" -C /tmp .
+          fi
           if [ -d "$ANDROID_SDK_PATH/platforms/android-37.0" ] && [ ! -d "$ANDROID_SDK_PATH/platforms/android-37" ]; then
             cp -r "$ANDROID_SDK_PATH/platforms/android-37.0" "$ANDROID_SDK_PATH/platforms/android-37"
             if [ -f "$ANDROID_SDK_PATH/platforms/android-37/package.xml" ]; then
