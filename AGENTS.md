@@ -2,7 +2,7 @@
 
 > **Repository:** `Max97k/GPSPY`  
 > **Default Branch:** `main`  
-> **Primary Technology Stack:** Kotlin (JVM 17), Android SDK 36, Jetpack Compose, Dagger-Hilt 2.50, Room 2.6.1 (KSP), Wear OS Compose, Play Services Location  
+> **Primary Technology Stack:** Kotlin (JVM 17), Android SDK 37, Jetpack Compose, Dagger-Hilt 2.50, Room 2.6.1 (KSP), Wear OS Compose, Play Services Location  
 > **Visibility:** Public  
 
 ---
@@ -29,8 +29,8 @@
 |               v                                              v              |
 |  +-----------------------------------------------------------------------+  |
 |  |                           Location Engine                             |  |
-|  |  - Foreground TrackingService (WakeLocks, Foreground Service Type)    |  |
-|  |  - FusedLocationProviderClient + GnssStatusCompat                     |  |
+|  |  - Foreground LocationTrackingService (Foreground Service Type)       |  |
+|  |  - FusedLocationProviderClient + Native GnssStatus                    |  |
 |  |  - Activity Recognition Transition API (STILL, WALKING, IN_VEHICLE)   |  |
 |  +-----------------------------------------------------------------------+  |
 |                                       |                                     |
@@ -38,7 +38,7 @@
 |  +-----------------------------------------------------------------------+  |
 |  |                         Data & Export Layer                           |  |
 |  |  - Room Database (Locations, Trajectories, Routines) via KSP          |  |
-|  |  - GpxGenerator (GPX 1.1 XML generation with 3D elevation & time)     |  |
+|  |  - GpxGenerator & GpxExportHelper (GPX 1.1 3D streaming XML & time)   |  |
 |  |  - DataStore Preferences (Configuration & Sensor calibration)        |  |
 |  +-----------------------------------------------------------------------+  |
 |                                                                             |
@@ -50,10 +50,11 @@
 |---|---|
 | `app/src/main/java/com/gpsspy/gpstracker/` | Mobile application root package. |
 | `app/.../MainActivity.kt` | Main entrypoint for phone UI with Compose navigation. |
-| `app/.../service/TrackingService.kt` | Foreground tracking service handling high-accuracy location stream and wake locks. |
-| `app/.../analysis/RoutineAnalysisManager.kt` | Routine classification engine (identifying Home, Work, Moving, Outdoor Stay). |
-| `app/.../receiver/ActivityUpdateReceiver.kt` | Broadcast receiver handling Activity Recognition transitions. |
+| `app/.../service/LocationTrackingService.kt` | Foreground tracking service handling high-accuracy location stream and battery throttling. |
+| `app/.../service/RoutineAnalysisManager.kt` | Routine classification engine (identifying Home, Work, Moving, Outdoor Stay). |
+| `app/.../service/ActivityUpdateReceiver.kt` | Broadcast receiver handling Activity Recognition transitions. |
 | `app/.../utils/GpxGenerator.kt` | GPX 1.1 XML file builder for track logging and elevation analysis. |
+| `app/.../utils/GpxExportHelper.kt` | Helper for streaming GPX 1.1 file generation and sharing via FileProvider. |
 | `app/src/test/.../` | Unit tests: `GpxGeneratorTest.kt`, `BenchmarkTest.kt`, `GpxExportBenchmarkTest.kt`. |
 | `wear/src/main/java/com/gpsspy/gpstracker/` | Wear OS standalone companion app. |
 | `wear/.../service/WearLocationService.kt` | Wearable background location recorder and telemetry provider. |
@@ -66,7 +67,7 @@
 
 ### 2.1 Prerequisites & Environment Setup
 - **JDK:** OpenJDK 17 or higher (`JAVA_HOME` configured).
-- **Android SDK:** `compileSdk = 36`, `minSdk = 26` (Mobile) / `minSdk = 30` (Wear), `targetSdk = 36`.
+- **Android SDK:** `compileSdk = 37`, `minSdk = 37`, `targetSdk = 37`.
 - **Gradle:** Gradle 8.x (managed via Gradle Wrapper `./gradlew`).
 
 ### 2.2 Build & Compilation Commands

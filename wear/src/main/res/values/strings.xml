@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GPSPY Wear</string>
+    <string name="wear_app_title">GPSPY</string>
+    <string name="wear_start">START</string>
+    <string name="wear_stop">STOP</string>
+    <string name="wear_recording">Recording...</string>
+    <string name="wear_ready">Ready</string>
+    <string name="wear_alt_format">Alt: %1$.1fm</string>
+    <string name="wear_lat_lon_format">Lat: %1$.4f\nLon: %2$.4f</string>
 </resources>

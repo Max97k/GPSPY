@@ -1,48 +1,76 @@
 package com.gpsspy.gpstracker
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.wear.ambient.AmbientModeSupport
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.wear.ambient.AmbientLifecycleObserver
 import com.gpsspy.gpstracker.service.ConnectionMonitor
 import com.gpsspy.gpstracker.ui.DashboardScreen
 
-class MainActivity : FragmentActivity(), AmbientModeSupport.AmbientCallbackProvider {
+class MainActivity : ComponentActivity() {
 
-    private lateinit var ambientController: AmbientModeSupport.AmbientController
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        ambientController = AmbientModeSupport.attach(this)
-        
-        setContent {
-            DashboardScreen(this)
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val locationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        if (locationGranted) {
+            checkConnection()
         }
     }
 
-    override fun getAmbientCallback(): AmbientModeSupport.AmbientCallback {
-        return object : AmbientModeSupport.AmbientCallback() {
-            override fun onEnterAmbient(ambientDetails: Bundle?) {
-                super.onEnterAmbient(ambientDetails)
-                // Handle entering ambient mode (e.g., lower refresh rate)
-            }
+    private var isAmbient by mutableStateOf(false)
 
-            override fun onExitAmbient() {
-                super.onExitAmbient()
-                // Handle exiting ambient mode
-            }
+    private val ambientCallback = object : AmbientLifecycleObserver.AmbientLifecycleCallback {
+        override fun onEnterAmbient(ambientDetails: AmbientLifecycleObserver.AmbientDetails) {
+            isAmbient = true
+        }
+        override fun onExitAmbient() {
+            isAmbient = false
+        }
+        override fun onUpdateAmbient() {}
+    }
 
-            override fun onUpdateAmbient() {
-                super.onUpdateAmbient()
-                // Update screen in ambient mode (called approx once a minute)
-            }
+    private val ambientObserver by lazy {
+        AmbientLifecycleObserver(this, ambientCallback)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        lifecycle.addObserver(ambientObserver)
+
+        checkAndRequestPermissions()
+
+        setContent {
+            DashboardScreen(this, isAmbient)
         }
     }
 
     override fun onResume() {
         super.onResume()
-        // We assume tracking is active here as a baseline for the example, 
-        // in a complete flow we would read the current shared state.
+        checkConnection()
+    }
+
+    private fun checkAndRequestPermissions() {
+        val permissionsNeeded = mutableListOf<String>()
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissionsNeeded.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        if (permissionsNeeded.isNotEmpty()) {
+            permissionLauncher.launch(permissionsNeeded.toTypedArray())
+        }
+    }
+
+    private fun checkConnection() {
         val connectionMonitor = ConnectionMonitor(this)
         connectionMonitor.checkConnectionAndTriggerFallback(isTrackingCurrently = true)
     }

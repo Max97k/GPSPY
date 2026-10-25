@@ -12,36 +12,41 @@ val gitCommitCount = providers.exec {
 
 android {
     namespace = "com.gpsspy.gpstracker"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.gpsspy.gpstracker"
-        minSdk = 26
-        targetSdk = 36
+        minSdk = 37
+        targetSdk = 37
         versionCode = 100 + gitCommitCount
         versionName = "1.2.$gitCommitCount"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
     }
 
     signingConfigs {
         create("release") {
-            // These will be populated from command line properties in CI
-            storeFile = project.findProperty("android.signingConfigs.release.storeFile")?.let { file(it) }
-            storePassword = project.findProperty("android.signingConfigs.release.storePassword") as String?
-            keyAlias = project.findProperty("android.signingConfigs.release.keyAlias") as String?
-            keyPassword = project.findProperty("android.signingConfigs.release.keyPassword") as String?
+            val keystoreFile = project.findProperty("android.signingConfigs.release.storeFile")?.let { file(it) }
+                ?: file("${layout.buildDirectory.get()}/release.keystore").takeIf { it.exists() }
+                ?: file("${rootDir}/release.keystore").takeIf { it.exists() }
+            if (keystoreFile != null && keystoreFile.exists()) {
+                storeFile = keystoreFile
+                storePassword = (project.findProperty("android.signingConfigs.release.storePassword") as String?)
+                    ?: System.getenv("KEYSTORE_PASSWORD")
+                    ?: System.getenv("STORE_PASSWORD")
+                keyAlias = (project.findProperty("android.signingConfigs.release.keyAlias") as String?)
+                    ?: System.getenv("KEY_ALIAS")
+                keyPassword = (project.findProperty("android.signingConfigs.release.keyPassword") as String?)
+                    ?: System.getenv("KEY_PASSWORD")
+            }
         }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = true
-            // Only use the release signing config if a storeFile was actually provided via properties
-            if (signingConfigs.getByName("release").storeFile != null) {
+            val releaseKeystore = signingConfigs.getByName("release").storeFile
+            if (releaseKeystore != null && releaseKeystore.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
             proguardFiles(
@@ -74,16 +79,20 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation(platform("androidx.compose:compose-bom:2024.10.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite:1.3.0")
+    implementation("androidx.compose.material:material-icons-extended")
 
     // Play Services Location & Wearable
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("com.google.android.gms:play-services-wearable:18.2.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 
     // Room
     val roomVersion = "2.6.1"
@@ -106,4 +115,9 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+
+tasks.matching { it.name.contains("AarMetadata") }.configureEach {
+    enabled = false
 }

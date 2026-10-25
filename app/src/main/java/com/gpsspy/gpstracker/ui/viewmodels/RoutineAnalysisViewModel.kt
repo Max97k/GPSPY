@@ -19,7 +19,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.Calendar
+import java.time.LocalDate
+import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -40,22 +41,15 @@ class RoutineAnalysisViewModel @Inject constructor(
         home.first != null && work.first != null
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    private val _currentDate = MutableStateFlow(Calendar.getInstance())
-    val currentDate: StateFlow<Calendar> = _currentDate.asStateFlow()
+    private val _currentDate = MutableStateFlow(LocalDate.now())
+    val currentDate: StateFlow<LocalDate> = _currentDate.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val routineSummary: StateFlow<RoutineSummary?> = _currentDate
-        .flatMapLatest { cal ->
-            val startCal = cal.clone() as Calendar
-            startCal.set(Calendar.HOUR_OF_DAY, 0)
-            startCal.set(Calendar.MINUTE, 0)
-            startCal.set(Calendar.SECOND, 0)
-            startCal.set(Calendar.MILLISECOND, 0)
-            val startOfDay = startCal.timeInMillis
-
-            val endCal = startCal.clone() as Calendar
-            endCal.add(Calendar.DAY_OF_YEAR, 1)
-            val endOfDay = endCal.timeInMillis
+        .flatMapLatest { date ->
+            val zoneId = ZoneId.systemDefault()
+            val startOfDay = date.atStartOfDay(zoneId).toInstant().toEpochMilli()
+            val endOfDay = date.plusDays(1).atStartOfDay(zoneId).toInstant().toEpochMilli()
 
             routineAnalysisDao.getAnalysesForDay(startOfDay, endOfDay)
                 .map { routines ->
@@ -63,7 +57,7 @@ class RoutineAnalysisViewModel @Inject constructor(
                     for (routine in routines) {
                         val effectiveStart = maxOf(routine.startTime, startOfDay)
                         val effectiveEnd = minOf(routine.endTime ?: System.currentTimeMillis(), endOfDay)
-                        
+
                         if (effectiveEnd > effectiveStart) {
                             val duration = effectiveEnd - effectiveStart
                             durations[routine.state] = (durations[routine.state] ?: 0L) + duration
@@ -75,15 +69,11 @@ class RoutineAnalysisViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun nextDay() {
-        val cal = _currentDate.value.clone() as Calendar
-        cal.add(Calendar.DAY_OF_YEAR, 1)
-        _currentDate.value = cal
+        _currentDate.value = _currentDate.value.plusDays(1)
     }
 
     fun previousDay() {
-        val cal = _currentDate.value.clone() as Calendar
-        cal.add(Calendar.DAY_OF_YEAR, -1)
-        _currentDate.value = cal
+        _currentDate.value = _currentDate.value.minusDays(1)
     }
 
     fun exportAndShareJson(context: Context) {
@@ -104,6 +94,7 @@ class RoutineAnalysisViewModel @Inject constructor(
             type = "application/json"
         }
         val shareIntent = Intent.createChooser(sendIntent, "Export Routine Analysis")
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(shareIntent)
     }
 }

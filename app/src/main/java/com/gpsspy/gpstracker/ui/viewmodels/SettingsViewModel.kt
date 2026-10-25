@@ -3,21 +3,22 @@ package com.gpsspy.gpstracker.ui.viewmodels
 import android.content.Context
 import android.location.Address
 import android.location.Geocoder
-import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gpsspy.gpstracker.data.preferences.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.IOException
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
@@ -51,59 +52,51 @@ class SettingsViewModel @Inject constructor(
 
     fun geocodeAddress(addressStr: String, isHome: Boolean, onResult: (Boolean, String?) -> Unit) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    val geocoder = Geocoder(context, Locale.getDefault())
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        geocoder.getFromLocationName(addressStr, 1, object : Geocoder.GeocodeListener {
-                            override fun onGeocode(addresses: MutableList<Address>) {
-                                handleGeocodeResult(addresses, isHome, onResult)
+            try {
+                val geocoder = Geocoder(context, Locale.getDefault())
+                val addresses = suspendCancellableCoroutine<List<Address>> { continuation ->
+                    geocoder.getFromLocationName(addressStr, 1, object : Geocoder.GeocodeListener {
+                        override fun onGeocode(addresses: MutableList<Address>) {
+                            if (continuation.isActive) {
+                                continuation.resume(addresses)
                             }
-                            override fun onError(errorMessage: String?) {
-                                viewModelScope.launch(Dispatchers.Main) {
-                                    onResult(false, errorMessage ?: "Geocoding failed")
-                                }
+                        }
+
+                        override fun onError(errorMessage: String?) {
+                            if (continuation.isActive) {
+                                continuation.resumeWithException(
+                                    IOException(errorMessage ?: "Geocoding failed")
+                                )
                             }
-                        })
-                    } else {
-                        @Suppress("DEPRECATION")
-                        val addresses = geocoder.getFromLocationName(addressStr, 1)
-                        handleGeocodeResult(addresses, isHome, onResult)
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        onResult(false, e.localizedMessage ?: "Geocoding failed")
-                    }
+                        }
+                    })
                 }
+                handleGeocodeResult(addresses, isHome, onResult)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                onResult(false, e.localizedMessage ?: "Geocoding failed")
             }
         }
     }
 
-    private fun handleGeocodeResult(addresses: List<Address>?, isHome: Boolean, onResult: (Boolean, String?) -> Unit) {
-        viewModelScope.launch {
-            if (!addresses.isNullOrEmpty()) {
-                val location = addresses[0]
-                if (location.hasLatitude() && location.hasLongitude()) {
-                    val lat = location.latitude
-                    val lng = location.longitude
-                    if (isHome) {
-                        settingsRepository.updateHomeLocation(lat, lng)
-                    } else {
-                        settingsRepository.updateWorkLocation(lat, lng)
-                    }
-                    withContext(Dispatchers.Main) {
-                        onResult(true, null)
-                    }
+    private suspend fun handleGeocodeResult(addresses: List<Address>?, isHome: Boolean, onResult: (Boolean, String?) -> Unit) {
+        if (!addresses.isNullOrEmpty()) {
+            val location = addresses[0]
+            if (location.hasLatitude() && location.hasLongitude()) {
+                val lat = location.latitude
+                val lng = location.longitude
+                if (isHome) {
+                    settingsRepository.updateHomeLocation(lat, lng)
                 } else {
-                    withContext(Dispatchers.Main) {
-                        onResult(false, "Address coordinates not found")
-                    }
+                    settingsRepository.updateWorkLocation(lat, lng)
                 }
+                onResult(true, null)
             } else {
-                 withContext(Dispatchers.Main) {
-                    onResult(false, "Address not found")
-                }
+                onResult(false, "Address coordinates not found")
             }
+        } else {
+            onResult(false, "Address not found")
         }
     }
 }

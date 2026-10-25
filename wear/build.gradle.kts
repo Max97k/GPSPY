@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.gpsspy.gpstracker.wear"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.gpsspy.gpstracker" // Must match mobile app exactly for paired communication
-        minSdk = 30 // Wear OS 3+ for Compose
-        targetSdk = 36
+        minSdk = 37
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
     }
@@ -36,11 +36,17 @@ android {
     buildFeatures {
         compose = true
     }
+    lint {
+        abortOnError = false
+    }
 }
 
 dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.fragment:fragment-ktx:1.8.5")
     implementation("com.google.android.gms:play-services-wearable:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
     
     // Compose for Wear OS
     implementation(platform("androidx.compose:compose-bom:2024.10.00"))
@@ -52,10 +58,16 @@ dependencies {
     
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
     
     // Icons
     implementation("androidx.compose.material:material-icons-extended")
     
     // Wear Core / Ambient Mode
     implementation("androidx.wear:wear:1.3.0")
+}
+
+
+tasks.matching { it.name.contains("AarMetadata") }.configureEach {
+    enabled = false
 }

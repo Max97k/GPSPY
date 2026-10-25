@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -13,9 +15,10 @@ import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material3.*
 import com.google.android.gms.wearable.*
+import com.gpsspy.gpstracker.wear.R
 
 @Composable
-fun DashboardScreen(context: Context) {
+fun DashboardScreen(context: Context, isAmbient: Boolean = false) {
     var latitude by remember { mutableDoubleStateOf(0.0) }
     var longitude by remember { mutableDoubleStateOf(0.0) }
     var altitude by remember { mutableDoubleStateOf(0.0) }
@@ -50,79 +53,95 @@ fun DashboardScreen(context: Context) {
     }
 
     MaterialTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-            contentAlignment = Alignment.Center
-        ) {
-            ScalingLazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+        AppScaffold {
+            ScreenScaffold(
+                scrollState = listState
             ) {
-                item {
-                    Text(
-                        text = "GPSPY",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
+                val backgroundColor = if (isAmbient) Color.Black else MaterialTheme.colorScheme.background
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(backgroundColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ScalingLazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.wear_app_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = if (isAmbient) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
 
-                item {
-                    Text(
-                        text = String.format("Alt: %.1fm", altitude),
-                        style = MaterialTheme.typography.displayMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                }
+                        item {
+                            Text(
+                                text = String.format(stringResource(R.string.wear_alt_format), altitude),
+                                style = MaterialTheme.typography.displayMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isAmbient) Color.White else MaterialTheme.colorScheme.onBackground
+                            )
+                        }
 
-                item {
-                    Text(
-                        text = String.format("Lat: %.4f\nLon: %.4f", latitude, longitude),
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                }
+                        item {
+                            Text(
+                                text = String.format(stringResource(R.string.wear_lat_lon_format), latitude, longitude),
+                                style = MaterialTheme.typography.bodySmall,
+                                textAlign = TextAlign.Center,
+                                color = if (isAmbient) Color.White.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                        }
 
-                item {
-                    Button(
-                        onClick = {
-                            val messageClient = Wearable.getMessageClient(context)
-                            val path = if (isTracking) "/stop-tracking" else "/start-tracking"
+                        // When in ambient mode, hide the button to protect battery and prevent burn-in
+                        if (!isAmbient) {
+                            item {
+                                Button(
+                                    onClick = {
+                                        val messageClient = Wearable.getMessageClient(context)
+                                        val path = if (isTracking) "/stop-tracking" else "/start-tracking"
 
-                            // Send to all connected nodes
-                            val nodeClient = Wearable.getNodeClient(context)
-                            nodeClient.connectedNodes.addOnSuccessListener { nodes ->
-                                for (node in nodes) {
-                                    messageClient.sendMessage(node.id, path, ByteArray(0))
+                                        // Send to all connected nodes
+                                        val nodeClient = Wearable.getNodeClient(context)
+                                        nodeClient.connectedNodes.addOnSuccessListener { nodes ->
+                                            for (node in nodes) {
+                                                messageClient.sendMessage(node.id, path, ByteArray(0))
+                                            }
+                                        }
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isTracking) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                                    ),
+                                    modifier = Modifier
+                                        .fillMaxWidth(0.8f)
+                                        .padding(bottom = 16.dp)
+                                ) {
+                                    Text(
+                                        text = if (isTracking) stringResource(R.string.wear_stop) else stringResource(R.string.wear_start),
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
                             }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isTracking) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                            .padding(bottom = 16.dp)
-                    ) {
-                        Text(
-                            text = if (isTracking) "STOP" else "START",
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
+                        }
 
-                item {
-                    Text(
-                        text = if (isTracking) "Recording..." else "Ready",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (isTracking) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-                    )
+                        item {
+                            Text(
+                                text = if (isTracking) stringResource(R.string.wear_recording) else stringResource(R.string.wear_ready),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = if (isAmbient) {
+                                    Color.White.copy(alpha = 0.6f)
+                                } else if (isTracking) {
+                                    MaterialTheme.colorScheme.tertiary
+                                } else {
+                                    MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -46,7 +46,7 @@ class RoutineAnalysisManager @Inject constructor(
 
     private val pendingIntent: PendingIntent by lazy {
         val intent = Intent(context, ActivityUpdateReceiver::class.java)
-        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         PendingIntent.getBroadcast(context, 0, intent, flags)
     }
 
@@ -104,7 +104,7 @@ class RoutineAnalysisManager @Inject constructor(
             val now = System.currentTimeMillis()
             val isMoving = activityType == DetectedActivity.IN_VEHICLE || activityType == DetectedActivity.ON_BICYCLE || activityType == DetectedActivity.WALKING || activityType == DetectedActivity.RUNNING
             
-            if (activityType == 3) { // STILL
+            if (activityType == DetectedActivity.STILL) {
                 if (stillStartTime == null) {
                     stillStartTime = now
                 } else {
