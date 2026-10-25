@@ -40,7 +40,9 @@ jobs:
           ANDROID_SDK_PATH="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
           mkdir -p "$ANDROID_SDK_PATH/tools/support"
           if [ ! -f "$ANDROID_SDK_PATH/tools/support/annotations.jar" ]; then
-            jar -cf "$ANDROID_SDK_PATH/tools/support/annotations.jar" -C /tmp .
+            TMP_DIR=$(mktemp -d)
+            jar -cf "$ANDROID_SDK_PATH/tools/support/annotations.jar" -C "$TMP_DIR" .
+            rm -rf "$TMP_DIR"
           fi
           if [ -d "$ANDROID_SDK_PATH/platforms/android-37.0" ] && [ ! -d "$ANDROID_SDK_PATH/platforms/android-37" ]; then
             cp -r "$ANDROID_SDK_PATH/platforms/android-37.0" "$ANDROID_SDK_PATH/platforms/android-37"
