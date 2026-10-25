@@ -56,9 +56,10 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          mkdir -p app/build
           if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '[:space:]' | base64 -d > app/build/release.keystore
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '[:space:]' | base64 -d > release.keystore
+            mkdir -p app/build
+            cp release.keystore app/build/release.keystore
           fi
 
       - name: Build and Sign Release App Bundle (AAB) & APK
